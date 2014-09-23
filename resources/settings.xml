@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <settings>
 	<category label="30101">
-		<setting id="source" label="30101" type="labelenum" default="YouSee.tv"
-                 values="YouSee.tv|XMLTV" />
+		<setting id="source" label="30101" type="labelenum" default="SapoMeo"
+                 values="YouSee.tv|XMLTV|SapoMeo" />
 
         <setting id="youseetv.category" label="30102" type="labelenum" default="Danske"
                  values="Danske|Filmkanaler|Grundpakken|Mellempakken|Fuldpakken|Nordiske|Engelske|Tyske|Latinske|Slaviske|Tyrkiske|Kurdiske|Arabiske|Asiatiske"
@@ -13,6 +13,7 @@
         <setting id="xmltv.file" label="30103" type="file" visible="eq(-1,0) + eq(-4,1)" />
         <setting id="xmltv.url" label="30122" type="text" visible="eq(-2,1) + eq(-5,1)"/>
         <setting id="xmltv.logo.folder" label="30116" type="folder" visible="eq(-6,1)"/>
+        <setting id="sapomeo.filterTVportuguesa" label="30900" type="bool"  default="true"  visible="eq(-7,2)"/>
 
     </category>
 

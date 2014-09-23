@@ -89,6 +89,8 @@ class StreamsService(object):
             for (label, stream) in self.getAddonStreams(id):
                 if label == channel.title:
                     matches.append((id, label, stream))
+                elif label == channel.id:
+                    matches.append((id, label, stream))
 
         if len(matches) == 1:
             return matches[0][2]

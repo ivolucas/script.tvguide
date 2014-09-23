@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 #      Copyright (C) 2013 Tommy Winther
 #      http://tommy.winther.nu
@@ -29,6 +30,8 @@ import buggalo
 from strings import *
 
 import ysapi
+import meoapi
+import streaming
 import xbmc
 import xbmcgui
 import xbmcvfs
@@ -372,8 +375,7 @@ class Database(object):
 
                     c.execute(
                         'INSERT INTO programs(channel, title, start_date, end_date, description, image_large, image_small, source, updates_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                        [channel, program.title, program.startDate, program.endDate, program.description,
-                         program.imageLarge, program.imageSmall, self.source.KEY, updatesId])
+                        [channel, program.title, program.startDate, program.endDate, program.description, program.imageLarge, program.imageSmall, self.source.KEY, updatesId])
 
             # channels updated
             c.execute("UPDATE sources SET channels_updated=? WHERE id=?", [datetime.datetime.now(), self.source.KEY])
@@ -805,6 +807,65 @@ class Source(object):
         return False
 
 
+class SapoMeoSource(Source):
+    KEY = 'sapomeo'
+
+    def __init__(self, addon):
+        self.date = datetime.datetime.today()
+        self.sapoMeoApi = meoapi.SapoMeoTVGuideApi()
+        self.filterTVportuguesa=addon.getSetting("sapomeo.filterTVportuguesa") == "true"
+        
+    def getDataFromExternal(self, date, progress_callback=None):
+        channels = self.sapoMeoApi.getChannelList()
+        entries = dict()
+        streamsService = streaming.StreamsService()
+        
+        for channel in channels:
+            
+            if not channel['Sigla'].startswith( 'M ' ):
+                entries[channel['Sigla']]=channel        	
+        
+        for idx, channelKey in enumerate(sorted(entries.keys())):
+            channel = entries[channelKey]
+            c = Channel(id=channel['Sigla'], title=channel['Name'], logo=None)
+            
+            if self.filterTVportuguesa:
+                matches = streamsService.detectStream(c)
+                if matches == None or len(matches)==0:
+                    c.visible=False
+            print c.title.encode('utf-8')
+            yield c
+            
+            try:
+                for program in self.sapoMeoApi.getChannelByDateInterval(c.id, date):
+                    description = program['Description']
+                    if description is None:
+                        description = strings(NO_DESCRIPTION)
+                    
+                  
+                    
+                    p = Program(
+                        c,
+                        program['Title'],                    
+                        self.convertDate(program['StartTime']),
+                        self.convertDate(program['EndTime']),
+                        description
+                    )
+                    print "  "+p.title.encode('utf-8')            
+                    yield p
+            except Exception, ex:
+            	xbmc.log('[script.tvguide] Uncaugt exception in source.py: %s' % str(ex) , xbmc.LOGDEBUG)
+
+                
+            if progress_callback:
+                if not progress_callback(100.0 / len(channels) * idx):
+                    raise SourceUpdateCanceledException()
+    def convertDate(self,dateString):
+    	t = time.strptime(dateString, '%Y-%m-%d %H:%M:%S')
+        return datetime.datetime(t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec)
+
+    	
+
 class YouSeeTvSource(Source):
     KEY = 'youseetv'
 
@@ -825,6 +886,7 @@ class YouSeeTvSource(Source):
                     description = strings(NO_DESCRIPTION)
 
                 imagePrefix = program['imageprefix']
+
 
                 p = Program(
                     c,
@@ -963,7 +1025,8 @@ class FileWrapper(object):
 def instantiateSource():
     SOURCES = {
         'YouSee.tv': YouSeeTvSource,
-        'XMLTV': XMLTVSource
+        'XMLTV': XMLTVSource,
+        'SapoMeo':SapoMeoSource
     }
 
     try:

@@ -346,3 +346,7 @@ msgstr ""
 msgctxt "#30804"
 msgid "Streaming using that addon is now disabled."
 msgstr ""
+
+msgctxt "#30900"
+msgid "Filter by TV Portuguesa Addon"
+msgstr ""
