@@ -78,12 +78,3 @@ if __name__ == '__main__':
 
     for e in sorted(entries.keys()):
         print e + '=' + entries[e]
-    dataCat = api.categories();
-
-    for c in dataCat:
-        print c
-    
-
-    #s = simplejson.dumps(json, sort_keys=True, indent='    ')
-    #print '\n'.join([l.rstrip() for l in  s.splitlines()])
-

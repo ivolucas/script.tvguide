@@ -836,25 +836,26 @@ class SapoMeoSource(Source):
             print c.title.encode('utf-8')
             yield c
             
-            try:
-                for program in self.sapoMeoApi.getChannelByDateInterval(c.id, date):
-                    description = program['Description']
-                    if description is None:
-                        description = strings(NO_DESCRIPTION)
-                    
-                  
-                    
-                    p = Program(
-                        c,
-                        program['Title'],                    
-                        self.convertDate(program['StartTime']),
-                        self.convertDate(program['EndTime']),
-                        description
-                    )
-                    print "  "+p.title.encode('utf-8')            
-                    yield p
-            except Exception, ex:
-            	xbmc.log('[script.tvguide] Uncaugt exception in source.py: %s' % str(ex) , xbmc.LOGDEBUG)
+            if c.visible:
+                try:
+                    for program in self.sapoMeoApi.getChannelByDateInterval(c.id, date):
+                        description = program['Description']
+                        if description is None:
+                            description = strings(NO_DESCRIPTION)
+                        
+                      
+                        
+                        p = Program(
+                            c,
+                            program['Title'],                    
+                            self.convertDate(program['StartTime']),
+                            self.convertDate(program['EndTime']),
+                            description
+                        )
+                        print "  "+p.title.encode('utf-8')            
+                        yield p
+                except Exception, ex:
+                	xbmc.log('[script.tvguide] Uncaugt exception in source.py: %s' % str(ex) , xbmc.LOGDEBUG)
 
                 
             if progress_callback:
